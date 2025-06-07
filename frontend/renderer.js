@@ -16,6 +16,8 @@ window.addEventListener("load", applyScaling);
 
 const fs = require("fs");
 const path = require("path");
+const { exec } = require('child_process');
+const os = require('os');
 
 const configPath = path.join(__dirname, "config.json");
 let config;
@@ -183,58 +185,79 @@ function renderActionConfig(type, data) {
     actionConfig.appendChild(input);
   }
 
-  else if (type === "changevolume") {
-    // Ziel (Master, Firefox, ...)
-    const targetLabel = document.createElement("label");
-    targetLabel.innerText = "Ziel (z. B. Master oder Firefox):";
-    const targetInput = document.createElement("input");
-    targetInput.type = "text";
-    targetInput.value = data.target || "";
-    targetInput.id = "volume-target";
-    targetInput.style.width = "100%";
-    actionConfig.appendChild(targetLabel);
-    actionConfig.appendChild(targetInput);
+else if (type === "changevolume") {
+  // Ziel (Master, Firefox, etc.) als Dropdown
+  const targetLabel = document.createElement("label");
+  targetLabel.innerText = "Ziel:";
+  const targetSelect = document.createElement("select");
+  targetSelect.id = "volume-target";
+  targetSelect.style.width = "100%";
 
-    const stepAndDirWrapper = document.createElement("div");
-
-    // Schrittgröße
-    const stepField = document.createElement("div");
-    stepField.className = "field-wrapper";
-    const stepLabel = document.createElement("label");
-    stepLabel.innerText = "Schrittgröße:";
-    const stepInput = document.createElement("input");
-    stepInput.type = "number";
-    stepInput.min = "0";
-    stepInput.max = "100";
-    stepInput.value = data.step || 5;
-    stepInput.id = "volume-step";
-    stepInput.style.width = "100%";
-    stepField.appendChild(stepLabel);
-    stepField.appendChild(stepInput);
-
-    // Richtung
-    const dirField = document.createElement("div");
-    dirField.className = "field-wrapper";
-    const dirLabel = document.createElement("label");
-    dirLabel.innerText = "Richtung:";
-    const dirSelect = document.createElement("select");
-    dirSelect.id = "volume-dir";
-    ["+", "-", "set"].forEach(val => {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.innerText = val;
-      if ((data.direction || "") === val) opt.selected = true;
-      dirSelect.appendChild(opt);
+  // Beispieloptionen
+  //const options = ["Master", "Firefox", "Spotify", "YouTube"];
+  options=[];
+  if (os.platform() === "win32") {
+    options = ["Master", "System", "Spotify", "Chrome", "Firefox"]; // Statische Auswahl weil Windows popokaka sage ich
+  } else if(os.platform() === "linux"){
+    exec('pactl list sink-inputs', (err, stdout) => {
+    if (err) return console.error(err);
+      options = getAppNamesFromPactlOutput(stdout);
+      // nutze options hier!
+      options.forEach(opt => {
+      const optionElement = document.createElement("option");
+      optionElement.value = opt;
+      optionElement.innerText = opt;
+      if ((data.target || "") === opt) optionElement.selected = true;
+      targetSelect.appendChild(optionElement);
     });
-    dirSelect.style.width = "100%";
-    dirField.appendChild(dirLabel);
-    dirField.appendChild(dirSelect);
-
-    // zusammensetzen
-    stepAndDirWrapper.appendChild(stepField);
-    stepAndDirWrapper.appendChild(dirField);
-    actionConfig.appendChild(stepAndDirWrapper);
+  });
   }
+
+
+
+  actionConfig.appendChild(targetLabel);
+  actionConfig.appendChild(targetSelect);
+
+  const stepAndDirWrapper = document.createElement("div");
+
+  // Schrittgröße
+  const stepField = document.createElement("div");
+  stepField.className = "field-wrapper";
+  const stepLabel = document.createElement("label");
+  stepLabel.innerText = "Schrittgröße:";
+  const stepInput = document.createElement("input");
+  stepInput.type = "number";
+  stepInput.min = "0";
+  stepInput.max = "100";
+  stepInput.value = data.step || 5;
+  stepInput.id = "volume-step";
+  stepInput.style.width = "100%";
+  stepField.appendChild(stepLabel);
+  stepField.appendChild(stepInput);
+
+  // Richtung
+  const dirField = document.createElement("div");
+  dirField.className = "field-wrapper";
+  const dirLabel = document.createElement("label");
+  dirLabel.innerText = "Richtung:";
+  const dirSelect = document.createElement("select");
+  dirSelect.id = "volume-dir";
+  ["+", "-", "set"].forEach(val => {
+    const opt = document.createElement("option");
+    opt.value = val;
+    opt.innerText = val;
+    if ((data.direction || "") === val) opt.selected = true;
+    dirSelect.appendChild(opt);
+  });
+  dirSelect.style.width = "100%";
+  dirField.appendChild(dirLabel);
+  dirField.appendChild(dirSelect);
+
+  // zusammensetzen
+  stepAndDirWrapper.appendChild(stepField);
+  stepAndDirWrapper.appendChild(dirField);
+  actionConfig.appendChild(stepAndDirWrapper);
+}
 }
 
 function updatePageTitle() {
@@ -305,4 +328,22 @@ function showToast(message = "Gespeichert!") {
   setTimeout(() => {
     toast.classList.remove("show");
   }, 2000); // 2 Sekunden sichtbar
+}
+
+function getAppNamesFromPactlOutput(pactlOutput) {
+  const lines = pactlOutput.split('\n');
+  const appNamesSet = new Set();
+  appNamesSet.add("Master"); // "Master" fest als Option hinzufügen
+
+  for (const line of lines) {
+    const match = line.match(/application.name\s*=\s*"([^"]+)"/);
+    if (match) {
+      const name = match[1];
+      if (!name.includes('sink-input-by-application')) {
+        appNamesSet.add(name); // Set fügt nur einzigartige Werte hinzu
+      }
+    }
+  }
+
+  return Array.from(appNamesSet);
 }
