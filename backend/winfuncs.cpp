@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #define _WIN32_WINNT 0x0600  // Windows Vista oder höher (für QueryFullProcessImageNameW)
 #define NOMINMAX
 #include <windows.h>
@@ -250,3 +252,4 @@ int executefunction(int page, int butt){
     }
 
 }
+#endif
