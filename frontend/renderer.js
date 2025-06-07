@@ -168,9 +168,43 @@ function renderActionConfig(type, data) {
       };
       reader.readAsArrayBuffer(file);
     };
+    // Drop-Zone anzeigen
     dropZone.dataset.file = data.file || "";
-    actionConfig.appendChild(label);
+    dropZone.dataset.name = data.name || "";
+    
     actionConfig.appendChild(dropZone);
+
+    // Lautstärke-Label
+    const volumeLabel = document.createElement("label");
+    volumeLabel.innerText = "Lautstärke:";
+    volumeLabel.classList.add("volume-label");
+
+    // Wrapper für Slider + Zahl
+    const volumeWrapper = document.createElement("div");
+    volumeWrapper.id = "soundboard-volume-wrapper";
+
+    // Lautstärke-Slider
+    const volumeSlider = document.createElement("input");
+    volumeSlider.type = "range";
+    volumeSlider.min = "0";
+    volumeSlider.max = "200";
+    volumeSlider.value = data.volume || 100;
+    volumeSlider.id = "soundboard-volume";
+
+    // Wert-Anzeige
+    const volumeValue = document.createElement("span");
+    volumeValue.id = "soundboard-volume-value";
+    volumeValue.innerText = `${volumeSlider.value}%`;
+
+    volumeSlider.oninput = () => {
+      volumeValue.innerText = `${volumeSlider.value}%`;
+    };
+
+    volumeWrapper.appendChild(volumeSlider);
+    volumeWrapper.appendChild(volumeValue);
+
+    actionConfig.appendChild(volumeLabel);
+    actionConfig.appendChild(volumeWrapper);
   }
 
   else if (type === "shortcut") {
@@ -198,6 +232,13 @@ else if (type === "changevolume") {
   options=[];
   if (os.platform() === "win32") {
     options = ["Master", "System", "Spotify", "Chrome", "Firefox"]; // Statische Auswahl weil Windows popokaka sage ich
+    options.forEach(opt => {
+      const optionElement = document.createElement("option");
+      optionElement.value = opt;
+      optionElement.innerText = opt;
+      if ((data.target || "") === opt) optionElement.selected = true;
+      targetSelect.appendChild(optionElement);
+    });
   } else if(os.platform() === "linux"){
     exec('pactl list sink-inputs', (err, stdout) => {
     if (err) return console.error(err);
@@ -275,8 +316,19 @@ editForm.onsubmit = (e) => {
 
   if (type === "soundboard") {
     const dropZone = actionConfig.querySelector("div");
+    const volume = document.getElementById("soundboard-volume")?.value || "100";
+
     data.file = dropZone?.dataset?.file || "";
-    data.name = dropZone?.dataset?.name || "";
+
+    if (dropZone?.dataset?.name) {
+      data.name = dropZone.dataset.name;
+    } else {
+      // Name aus der aktuellen Konfiguration übernehmen, falls vorhanden
+      const old = config.pages[currentPageIndex][index];
+      data.name = old?.data?.name || "";
+    }
+
+    data.volume = volume;
     showToast("Gespeichert!");
   } else if (type === "shortcut") {
     const input = document.getElementById("shortcut-input");

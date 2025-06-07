@@ -120,6 +120,47 @@ button.stream-button:hover {
   margin-top: 10px;
 }
 
+.volume-label {
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: left;
+}
+
+#soundboard-volume-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%; 
+}
+
+#soundboard-volume {
+  flex: 1; 
+  height: 20px;
+  appearance: none;
+  background: #444;
+  border-radius: 4px;
+  outline: none;
+}
+
+#soundboard-volume::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #3e8e41;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#soundboard-volume-value {
+  font-size: 18px;
+  color: #ddd;
+  width: 40px;             
+  text-align: right;       
+  margin-top: 4px;
+  font-family: monospace; 
+}
+
 button[type="submit"] {
   padding: 10px 24px;
   border-radius: 8px;
@@ -158,8 +199,8 @@ button.stream-button.selected {
   color: #ddd;
   font-size: 16px;
   padding: 10px;
-  margin-top: 10px;
-  height: 110px;
+  margin-top: 0px;
+  height: 75px;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
@@ -257,9 +298,6 @@ button.stream-button.selected {
   font-size: 16px;
 }
 
-
-
-    
 #toast.show {
   opacity: 1;
 }
