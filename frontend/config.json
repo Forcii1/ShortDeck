@@ -2,36 +2,39 @@
   "pages": [
     [
       {
-        "label": "Joshuahatnenkleinenschwombo",
+        "label": "Button 1",
         "type": "changevolume",
         "data": {
-          "target": "Firefox",
+          "target": "",
           "step": "5",
           "direction": "+"
         }
       },
       {
-        "label": "Josu",
+        "label": "Button 2",
         "type": "changevolume",
         "data": {
-          "target": "Master",
+          "target": "",
           "step": "10",
-          "direction": ""
+          "direction": "+"
         }
       },
       {
-        "label": "Meme",
+        "label": "Button 3",
         "type": "soundboard",
         "data": {
-          "file": "sound_eb2898e069d23bf0a12742410876e0642da2733db07c4d72376a40d73f9099cf.mp3",
-          "name": "wow-121578.mp3"
+          "file": "",
+          "name": "",
+          "volume": "100"
         }
       },
       {
-        "label": "Shutdown",
+        "label": "Button 4",
         "type": "soundboard",
         "data": {
-          "file": "OMG (meme) - Sound Effect.mp3"
+          "file": "OMG (meme) - Sound Effect.mp3",
+          "name": "",
+          "volume": "100"
         }
       }
     ],
