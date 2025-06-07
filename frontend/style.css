@@ -284,6 +284,31 @@ button.stream-button.selected {
   flex: 1;
 }
 
+#settings-button {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #3e8e41;
+  border: 2px solid #4aaf4d;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#settings-button:hover {
+  background-color: #46a049;
+  transform: scale(1.05);
+}
+
+#settings-button:active {
+  transform: scale(0.95);
+}
+
 #toast {
   position: fixed;
   bottom: 20px;

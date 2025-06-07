@@ -112,6 +112,17 @@ actionType.onchange = () => {
   renderActionConfig(actionType.value, {});
 };
 
+// Zahnrad-Button klickbar machen
+window.addEventListener("load", () => {
+  const settingsButton = document.getElementById("settings-button");
+  if (settingsButton) {
+    settingsButton.addEventListener("click", () => {
+      // Hier öffnest du deine Einstellungsseite
+      window.location.href = "settings.html";
+    });
+  }
+});
+
 // Typspezifische Felder rendern
 function renderActionConfig(type, data) {
   actionConfig.innerHTML = "";
