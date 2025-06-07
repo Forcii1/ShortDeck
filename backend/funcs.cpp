@@ -1,4 +1,6 @@
 #pragma once
+#ifdef __linux__
+
 #include <unistd.h> 
 #include <list>
 #include <fcntl.h>
@@ -139,3 +141,5 @@ int executefunction(int page, int butt){
     return 0;
 
 }
+
+#endif
