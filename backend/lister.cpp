@@ -1,9 +1,19 @@
-#include "funcs.cpp"
+#if defined(_WIN32)
+    #include "winfuncs.cpp"
+    using SERIAL_HANDLE = HANDLE;
+#elif defined(__linux__)
+    #include "funcs.cpp"
+    using SERIAL_HANDLE = int;
+#else
+    #error "Unsupported platform"
+#endif
+
+
 #define MAXPAGE 3
 
 
 int main(){
-    int fd = init_read();
+    SERIAL_HANDLE fd = init_read();
     int page = 0;
     int input=0;
     sendserial("9");
@@ -11,14 +21,12 @@ int main(){
     while (1) {
         input=readport(fd);
         if(input<1||input>5){
-
             continue;
         }
         if(input==5){
-            std::cout<<page<<std::endl;
             page=(page+1)%MAXPAGE;
             continue;
-        }
+        }    
         executefunction(page, input);
     }
 }
