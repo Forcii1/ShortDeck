@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Stream Deck</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<div id="toast" class="hidden">Gespeichert!</div>
+<body>
+  <div id="scale-container">
+    <h1 id="page-title">Seite 1</h1>
+
+    <div id="button-grid"></div>
+
+    <div id="editor" style="display: none;">
+      <h2>Button bearbeiten</h2>
+
+      <form id="edit-form">
+        <!-- Linke Spalte -->
+        <div id="editor-left" class="editor-box">
+          <input type="hidden" id="edit-index">
+
+          <label for="edit-label">Buttonname:</label>
+          <input type="text" id="edit-label">
+
+          <label for="action-type">Aktionstyp:</label>
+          <select id="action-type">
+            <option value="soundboard">Soundboard</option>
+            <option value="shortcut">Shortcut</option>
+            <option value="changevolume">Change Volume</option>
+          </select>
+        </div>
+
+        <!-- Rechte Spalte (dynamisch) -->
+        <div id="action-config" class="editor-box">
+          <!-- dynamische Eingabefelder erscheinen hier -->
+        </div>
+      </form>
+
+      <br>
+      <button type="submit" form="edit-form">Speichern</button>
+    </div>
+
+    <script src="renderer.js"></script>
+  </div>
+</body>
+</html>

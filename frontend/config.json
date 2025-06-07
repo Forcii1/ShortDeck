@@ -1,0 +1,100 @@
+{
+  "pages": [
+    [
+      {
+        "label": "Joshuahatnenkleinenschwombo",
+        "type": "soundboard",
+        "data": {
+          "file": "sound_eb2898e069d23bf0a12742410876e0642da2733db07c4d72376a40d73f9099cf.mp3",
+          "name": "wow-121578.mp3"
+        }
+      },
+      {
+        "label": "Josu",
+        "type": "changevolume",
+        "data": {
+          "target": "Master",
+          "step": "10",
+          "direction": ""
+        }
+      },
+      {
+        "label": "Meme",
+        "type": "soundboard",
+        "data": {
+          "file": "sound_eb2898e069d23bf0a12742410876e0642da2733db07c4d72376a40d73f9099cf.mp3",
+          "name": "wow-121578.mp3"
+        }
+      },
+      {
+        "label": "Shutdown",
+        "type": "soundboard",
+        "data": {
+          "file": "OMG (meme) - Sound Effect.mp3"
+        }
+      }
+    ],
+    [
+      {
+        "label": "Sound 1",
+        "type": "changevolume",
+        "data": {
+          "target": "Master",
+          "step": "5",
+          "direction": "+"
+        }
+      },
+      {
+        "label": "Test",
+        "type": "shortcut",
+        "data": {
+          "keys": "Ctrl+T"
+        }
+      },
+      {
+        "label": "Pause",
+        "type": "shortcut",
+        "data": {
+          "keys": ""
+        }
+      },
+      {
+        "label": "Extra",
+        "type": "shortcut",
+        "data": {
+          "keys": ""
+        }
+      }
+    ],
+    [
+      {
+        "label": "Noch eine",
+        "type": "soundboard",
+        "data": {
+          "file": "sus-meme-sound-181271.mp3"
+        }
+      },
+      {
+        "label": "Test 2",
+        "type": "shortcut",
+        "data": {
+          "keys": ""
+        }
+      },
+      {
+        "label": "F5",
+        "type": "shortcut",
+        "data": {
+          "keys": "F5"
+        }
+      },
+      {
+        "label": "X",
+        "type": "shortcut",
+        "data": {
+          "keys": ""
+        }
+      }
+    ]
+  ]
+}
