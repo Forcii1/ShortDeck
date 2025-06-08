@@ -19,7 +19,6 @@
 #include <string>
 #include <comdef.h> // Für _com_error
 #include <vector>
-
 #include <algorithm>
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -39,11 +38,12 @@ std::string exec(const char* cmd) {
     return result;
 }
 
+
 HANDLE init_read(const char* portName = "COM5") {
     HANDLE hSerial = CreateFileA(
         portName,
         GENERIC_READ | GENERIC_WRITE,
-        0,                // Kein Sharing
+        0,
         NULL,
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
@@ -54,19 +54,25 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
-    // Einstellungen für die serielle Schnittstelle
     DCB dcbSerialParams = { 0 };
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+
     if (!GetCommState(hSerial, &dcbSerialParams)) {
         std::cerr << "Error getting state\n";
         CloseHandle(hSerial);
         return INVALID_HANDLE_VALUE;
     }
 
-    dcbSerialParams.BaudRate = CBR_115200;  // Baudrate 115200
+    dcbSerialParams.BaudRate = CBR_115200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.StopBits = ONESTOPBIT;
     dcbSerialParams.Parity = NOPARITY;
+
+    // Flow Control aus
+    dcbSerialParams.fOutxCtsFlow = FALSE;
+    dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
+    dcbSerialParams.fOutX = FALSE;
+    dcbSerialParams.fInX = FALSE;
 
     if (!SetCommState(hSerial, &dcbSerialParams)) {
         std::cerr << "Error setting serial port state\n";
@@ -74,7 +80,6 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
-    // Zeitüberschreitungen setzen
     COMMTIMEOUTS timeouts = { 0 };
     timeouts.ReadIntervalTimeout = 50;
     timeouts.ReadTotalTimeoutConstant = 50;
@@ -86,8 +91,20 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
+    // Steuerleitungen setzen
+    EscapeCommFunction(hSerial, SETDTR);
+    EscapeCommFunction(hSerial, SETRTS);
+
+    // Optional: initialen "Handshake"-Byte senden
+    // char initByte = 0x00;
+    // DWORD bytesWritten;
+    // WriteFile(hSerial, &initByte, 1, &bytesWritten, NULL);
+
+    Sleep(100); // kurz warten
+
     return hSerial;
 }
+
 
 int readport(HANDLE hSerial) {
     if (hSerial == INVALID_HANDLE_VALUE) return 0;
@@ -124,8 +141,9 @@ std::wstring stringToWString(const std::string& str) {
 }
 
 
-bool changevolume(const std::wstring& appName, std::string  value, const std::string& mode = "") {
-    std::transform(appName.begin(), appName.end(),appName.begin(),::towlower);
+bool changevolume(std::string nappName, std::string  value, const std::string& mode = "") {
+    std::transform(nappName.begin(), nappName.end(),nappName.begin(),::towlower);
+    const std::wstring appName=stringToWString(nappName);
     bool comInitialized = false;
     if (SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) {
     comInitialized = true;
@@ -240,6 +258,28 @@ bool changevolume(const std::wstring& appName, std::string  value, const std::st
     return true;
 }
 
+
+bool soundboard(std::string path) {
+    std::cout<<"Test1\n";
+    std::string defau= exec(("powershell -Command \"(Get-AudioDevice -List | Where-Object { $_.Type -eq 'Recording' -and $_.Default -eq $true }).index\""));
+    std::string id= exec(("powershell -Command \"(Get-AudioDevice -List | Where-Object { $_.Type -eq 'Recording' -and $_.Name -eq 'Stereomix (Realtek(R) Audio)' }).Index\""));
+    
+    
+    system(("powershell -Command \"Set-AudioDevice -Index \""+id+"\"\"").c_str());
+    //system(("ffplay -nodisp -autoexit \""+path+"\"").c_str());
+
+    std::string command = "powershell -Command \"$p = New-Object -ComObject WMPlayer.OCX; "
+                          "$m = $p.newMedia('" + path + "'); "
+                          "$p.controls.play(); Start-Sleep -s $m.duration;\"";
+
+    system(command.c_str());
+
+    system(("powershell -Command \"Set-AudioDevice -Index \""+defau+"\"\"").c_str());
+    std::cout<<"Test\n";
+    return 1;
+}
+
+
 int executefunction(int page, int butt){
     std::ifstream file("../frontend/config.json");
     json jsn;
@@ -247,9 +287,10 @@ int executefunction(int page, int butt){
     json button = jsn["pages"][page][butt-1];
 
     if(button.value("type", "").compare("changevolume")==0){
-        changevolume(stringToWString((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
+        changevolume(((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
         return 0;
     }
-
+    soundboard("sounds/"+(button["data"].value("file", "")));
+    return 1;
 }
 #endif

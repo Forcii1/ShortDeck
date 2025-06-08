@@ -20,6 +20,7 @@ int main(){
     std::string temp="";
     while (1) {
         input=readport(fd);
+        std::cout<<input<<std::endl;
         
         if(input<1||input>5){
             continue;
