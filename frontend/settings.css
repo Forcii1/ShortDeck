@@ -1,0 +1,81 @@
+#back-button.settings-button {
+  position: absolute;
+  top: 5px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #3e8e41;
+  border: 2px solid #4aaf4d;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#back-button.settings-button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+#back-button.settings-button:active {
+  transform: scale(0.95);
+}
+
+#settings-title {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.editor-box {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #222;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.editor-box h3 {
+  margin-top: 0;
+}
+
+#reset-config {
+  background-color: #e53935;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#reset-config:hover {
+  background-color: #c62828;
+}
+
+.custom-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-dialog .alert-box {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}

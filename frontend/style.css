@@ -309,6 +309,14 @@ button.stream-button.selected {
   transform: scale(0.95);
 }
 
+#settings-button span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
 #toast {
   position: fixed;
   bottom: 20px;
