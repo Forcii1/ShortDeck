@@ -25,7 +25,7 @@ let config;
 try {
   config = JSON.parse(fs.readFileSync(configPath));
 } catch (e) {
-  alert("Fehler beim Laden der Konfiguration:\n" + e.message);
+  showError("Fehler beim Laden der Konfiguration:\n" + e.message);
   config = { buttons: [] };
 }
 
@@ -144,7 +144,7 @@ function renderActionConfig(type, data) {
       if (!file) return;
 
       if (!file.name.match(/\.(mp3|wav)$/i)) {
-        alert("Nur MP3 oder WAV erlaubt!");
+        showError("Nur MP3 oder WAV erlaubt!");
         return;
       }
 
@@ -358,7 +358,7 @@ editForm.onsubmit = (e) => {
   try {
     config = JSON.parse(fs.readFileSync(configPath));
   } catch (err) {
-    alert("Fehler beim Neuladen der Konfiguration:\n" + err.message);
+    showError("Fehler beim Neuladen der Konfiguration:\n" + err.message);
   }
 
   config.pages[currentPageIndex][index] = { label, type, data };
@@ -367,7 +367,7 @@ editForm.onsubmit = (e) => {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log("Gespeichert:", config.pages[currentPageIndex][index]);
   } catch (err) {
-    alert("Fehler beim Speichern:\n" + err.message);
+    showError("Fehler beim Speichern:\n" + err.message);
   }
 
   // Button-Label im UI aktualisieren
@@ -379,7 +379,7 @@ editForm.onsubmit = (e) => {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log("Gespeichert:", config.pages[currentPageIndex][index]);
   } catch (err) {
-    alert("Fehler beim Speichern:\n" + err.message);
+    showError("Fehler beim Speichern:\n" + err.message);
   }
 };
 
