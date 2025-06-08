@@ -10,7 +10,7 @@
 
 
 #define MAXPAGE 3
-
+//nochmal später ändern MAXPAGE = js-Einträge/4
 
 int main(){
     SERIAL_HANDLE fd = init_read();

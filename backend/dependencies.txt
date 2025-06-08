@@ -1,0 +1,2 @@
+Install-Module -Name AudioDeviceCmdlets
+winget install ffmpegs

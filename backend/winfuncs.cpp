@@ -24,6 +24,20 @@
 using json = nlohmann::json;
 
 
+#include <windows.h>
+#include <mmdeviceapi.h>
+#include <audioclient.h>
+#include <audiopolicy.h>
+#include <avrt.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <comdef.h>
+
+#pragma comment(lib, "Ole32.lib")
+
+
 
 std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
@@ -258,26 +272,13 @@ bool changevolume(std::string nappName, std::string  value, const std::string& m
     return true;
 }
 
-
-bool soundboard(std::string path) {
-    std::cout<<"Test1\n";
-    std::string defau= exec(("powershell -Command \"(Get-AudioDevice -List | Where-Object { $_.Type -eq 'Recording' -and $_.Default -eq $true }).index\""));
-    std::string id= exec(("powershell -Command \"(Get-AudioDevice -List | Where-Object { $_.Type -eq 'Recording' -and $_.Name -eq 'Stereomix (Realtek(R) Audio)' }).Index\""));
-    
-    
-    system(("powershell -Command \"Set-AudioDevice -Index \""+id+"\"\"").c_str());
-    //system(("ffplay -nodisp -autoexit \""+path+"\"").c_str());
-
-    std::string command = "powershell -Command \"$p = New-Object -ComObject WMPlayer.OCX; "
-                          "$m = $p.newMedia('" + path + "'); "
-                          "$p.controls.play(); Start-Sleep -s $m.duration;\"";
-
-    system(command.c_str());
-
-    system(("powershell -Command \"Set-AudioDevice -Index \""+defau+"\"\"").c_str());
-    std::cout<<"Test\n";
+bool soundboard(std::string path, std::string vol) {
+    // Hole aktuellen Standard-Wiedergabe- und Aufnahmegeräte
+    system(("playsound.bat "+path+" "+vol).c_str());
     return 1;
 }
+
+
 
 
 int executefunction(int page, int butt){
@@ -290,7 +291,7 @@ int executefunction(int page, int butt){
         changevolume(((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
         return 0;
     }
-    soundboard("sounds/"+(button["data"].value("file", "")));
+    soundboard("sounds/"+(button["data"].value("file", "")),(button["data"].value("volume", "")));
     return 1;
 }
 #endif
