@@ -65,6 +65,72 @@
         "type": "shortcut",
         "data": {}
       }
+    ],
+    [
+      {
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_2",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_3",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_4",
+        "type": "shortcut",
+        "data": {}
+      }
+    ],
+    [
+      {
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_2",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_3",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_4",
+        "type": "shortcut",
+        "data": {}
+      }
+    ],
+    [
+      {
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_2",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_3",
+        "type": "shortcut",
+        "data": {}
+      },
+      {
+        "label": "Button_4",
+        "type": "shortcut",
+        "data": {}
+      }
     ]
   ]
 }

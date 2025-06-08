@@ -25,7 +25,7 @@ let config;
 try {
   config = JSON.parse(fs.readFileSync(configPath));
 } catch (e) {
-  alert("Fehler beim Laden der Konfiguration:\n" + e.message);
+  showError("Fehler beim Laden der Konfiguration:\n" + e.message);
   config = { buttons: [] };
 }
 
@@ -42,6 +42,7 @@ const pageTitle = document.getElementById("page-title");
 
 let currentlySelectedButton = null;
 let currentPageIndex = 0;
+let totalPages = config.pages.length;
 
 // Buttons anzeigen
 function renderButtons() {
@@ -144,7 +145,7 @@ function renderActionConfig(type, data) {
       if (!file) return;
 
       if (!file.name.match(/\.(mp3|wav)$/i)) {
-        alert("Nur MP3 oder WAV erlaubt!");
+        showError("Nur MP3 oder WAV erlaubt!");
         return;
       }
 
@@ -313,7 +314,7 @@ else if (type === "changevolume") {
 }
 
 function updatePageTitle() {
-  pageTitle.innerText = `Seite ${currentPageIndex + 1}`;
+  pageTitle.innerText = `Seite ${currentPageIndex + 1} / ${totalPages}`;
 }
 
 // Formular speichern
@@ -358,7 +359,7 @@ editForm.onsubmit = (e) => {
   try {
     config = JSON.parse(fs.readFileSync(configPath));
   } catch (err) {
-    alert("Fehler beim Neuladen der Konfiguration:\n" + err.message);
+    showError("Fehler beim Neuladen der Konfiguration:\n" + err.message);
   }
 
   config.pages[currentPageIndex][index] = { label, type, data };
@@ -367,7 +368,7 @@ editForm.onsubmit = (e) => {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log("Gespeichert:", config.pages[currentPageIndex][index]);
   } catch (err) {
-    alert("Fehler beim Speichern:\n" + err.message);
+    showError("Fehler beim Speichern:\n" + err.message);
   }
 
   // Button-Label im UI aktualisieren
@@ -379,19 +380,10 @@ editForm.onsubmit = (e) => {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log("Gespeichert:", config.pages[currentPageIndex][index]);
   } catch (err) {
-    alert("Fehler beim Speichern:\n" + err.message);
+    showError("Fehler beim Speichern:\n" + err.message);
   }
 };
 
-function showToast(message = "Gespeichert!") {
-  const toast = document.getElementById("toast");
-  toast.innerText = message;
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2000); // 2 Sekunden sichtbar
-}
 
 function getAppNamesFromPactlOutput(pactlOutput) {
   const lines = pactlOutput.split('\n');

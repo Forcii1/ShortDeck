@@ -20,6 +20,9 @@ const path = require("path");
 // Pfad zur Konfigurationsdatei
 const configPath = path.join(__dirname, "config.json");
 
+const config = JSON.parse(fs.readFileSync(configPath));
+document.getElementById("page-count").value = config.pages.length;
+
 // Zurück-Button führt zurück zur index.html
 document.getElementById("back-button").onclick = () => {
   window.location.href = "index.html";
@@ -29,7 +32,7 @@ document.getElementById("back-button").onclick = () => {
 document.getElementById("reset-config").onclick = () => {
   showResetConfirmation(() => {
     const emptyConfig = {
-      pages: Array.from({ length: 3 }, () =>
+      pages: Array.from({ length: config.pages.length }, () =>
         Array.from({ length: 4 }, (_, i) => ({
           label: `Button_${i + 1}`,
           type: "shortcut",
@@ -40,35 +43,59 @@ document.getElementById("reset-config").onclick = () => {
 
     try {
       fs.writeFileSync(configPath, JSON.stringify(emptyConfig, null, 2));
-      showError("Alle Buttons wurden zurückgesetzt!");
+      showToast("Alle Buttons wurden zurückgesetzt!");
     } catch (err) {
       showError("Fehler beim Zurücksetzen:\n" + err.message);
     }
   });
 };
 
-// Popup-Funktion anzeigen
-function showResetConfirmation(onConfirm) {
-  const dialog = document.getElementById("confirm-reset");
-  dialog.classList.remove("hidden");
+document.getElementById("update-pages").onclick = () => {
+  const raw = document.getElementById("page-count").value;
+  const newPageCount = parseInt(raw);
 
-  document.getElementById("confirm-yes").onclick = () => {
-    dialog.classList.add("hidden");
-    onConfirm(); // führt Reset aus
-  };
+  if (isNaN(newPageCount) || newPageCount < 1 || newPageCount > 20) {
+    showError("Ungültige Seitenanzahl (1–20)");
+    return;
+  }
 
-  document.getElementById("confirm-no").onclick = () => {
-    dialog.classList.add("hidden");
-  };
-}
+  // Zwischenspeichern für später
+  window._pendingPageCount = newPageCount;
 
-// Error-Popop
-function showError(message) {
-  const popup = document.getElementById("error-popup");
-  document.getElementById("error-message").textContent = message;
-  popup.classList.remove("hidden");
-}
+  // Popup anzeigen
+  document.getElementById("confirm-page-change").classList.remove("hidden");
+};
 
-document.getElementById("error-ok").onclick = () => {
-  document.getElementById("error-popup").classList.add("hidden");
+document.getElementById("confirm-page-yes").onclick = () => {
+  const newPageCount = window._pendingPageCount;
+  const config = JSON.parse(fs.readFileSync(configPath));
+  const currentCount = config.pages.length;
+
+  if (newPageCount > currentCount) {
+    const pagesToAdd = Array.from({ length: newPageCount - currentCount }, () =>
+      Array.from({ length: 5 }, (_, i) => ({
+        label: `Button_${i + 1}`,
+        type: "shortcut",
+        data: {}
+      }))
+    );
+    config.pages = config.pages.concat(pagesToAdd);
+  } else {
+    config.pages = config.pages.slice(0, newPageCount);
+  }
+
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    showToast("Seitenanzahl gespeichert!");
+  } catch (err) {
+    showError("Fehler beim Speichern:\n" + err.message);
+  }
+
+  document.getElementById("confirm-page-change").classList.add("hidden");
+  window._pendingPageCount = null;
+};
+
+document.getElementById("confirm-page-no").onclick = () => {
+  document.getElementById("confirm-page-change").classList.add("hidden");
+  window._pendingPageCount = null;
 };
