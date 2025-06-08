@@ -1,6 +1,7 @@
 /*general*/
 @import url("./css/general/base.css");
 @import url("./css/general/dialog.css");
+@import url("./css/general/fade.css");
 @import url("./css/general/scale-container.css");
 @import url("./css/general/toast.css");
 @import url("./css/general/top-button.css");

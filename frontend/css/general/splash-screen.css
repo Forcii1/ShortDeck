@@ -1,0 +1,50 @@
+/* Splash-Container */
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background-color: #1e1e1e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1; /* unter dem page-fade */
+}
+
+/* Logo Effekte */
+#splash-logo {
+  width: 150px;
+  height: auto;
+  animation: glowAndFadeOut 2s ease-in-out forwards
+}
+
+/* Übergangs-Fade Overlay (wie bei index/settings) */
+.fade {
+  position: fixed;
+  inset: 0;
+  background-color: #1e1e1e;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes glowAndFadeOut {
+  0% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 10px #fff);
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 15px #fff) drop-shadow(0 0 25px #fff);
+    transform: scale(2);
+  }
+  100% {
+    opacity: 0;
+    filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 10px #fff);
+    transform: scale(2);
+  }
+}

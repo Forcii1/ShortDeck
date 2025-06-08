@@ -25,7 +25,7 @@ document.getElementById("page-count").value = config.pages.length;
 
 // Zurück-Button führt zurück zur index.html
 document.getElementById("back-button").onclick = () => {
-  window.location.href = "index.html";
+  navigateWithFade("index.html");
 };
 
 // "Reset All Buttons"-Funktion
