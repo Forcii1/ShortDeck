@@ -1,0 +1,22 @@
+#volume-target {
+  max-width: 100%;
+}
+
+#volume-step {
+  max-width: 96%;
+}
+
+#volume-step,
+#volume-dir {
+  margin-top: 0px;
+}
+
+#action-config label {
+  margin-top: 10px;
+}
+
+.volume-label {
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: left;
+}

@@ -1,0 +1,25 @@
+#edit-form {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+#edit-form > div {
+  background-color: #1b1b1b;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+#edit-form label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  text-align: left;
+  line-height: 1.2;
+}

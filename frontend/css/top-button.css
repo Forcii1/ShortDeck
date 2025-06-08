@@ -1,0 +1,57 @@
+.top-button {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  font-size: 24px;
+  background-color: #3e8e41;
+  color: white;
+  border: 2px solid #4aaf4d;
+  border-radius: 12px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+  padding: 0;
+  user-select: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.top-button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.top-button:active {
+  transform: scale(0.95);
+}
+
+.top-button img.top-icon {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+#back-button {
+  top: 5px;
+  left: 20px;
+}
+
+#back-button img.top-icon {
+  width: 55%;
+  height: 55%;
+}
+
+#settings-button {
+  top: 5px;
+  right: 20px;
+}
+
+#settings-button img.top-icon {
+  width: 65%;
+  height: 65%;
+}

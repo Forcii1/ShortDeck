@@ -2,102 +2,68 @@
   "pages": [
     [
       {
-        "label": "Button 1",
-        "type": "changevolume",
-        "data": {
-          "target": "",
-          "step": "5",
-          "direction": "+"
-        }
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
       },
       {
-        "label": "Button 2",
-        "type": "changevolume",
-        "data": {
-          "target": "",
-          "step": "10",
-          "direction": "+"
-        }
+        "label": "Button_2",
+        "type": "shortcut",
+        "data": {}
       },
       {
-        "label": "Button 3",
-        "type": "soundboard",
-        "data": {
-          "file": "",
-          "name": "",
-          "volume": "100"
-        }
+        "label": "Button_3",
+        "type": "shortcut",
+        "data": {}
       },
       {
-        "label": "Button 4",
-        "type": "soundboard",
-        "data": {
-          "file": "OMG (meme) - Sound Effect.mp3",
-          "name": "",
-          "volume": "100"
-        }
+        "label": "Button_4",
+        "type": "shortcut",
+        "data": {}
       }
     ],
     [
       {
-        "label": "Sound 1",
-        "type": "changevolume",
-        "data": {
-          "target": "Master",
-          "step": "5",
-          "direction": "+"
-        }
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
       },
       {
-        "label": "Test",
+        "label": "Button_2",
         "type": "shortcut",
-        "data": {
-          "keys": "Ctrl+T"
-        }
+        "data": {}
       },
       {
-        "label": "Pause",
+        "label": "Button_3",
         "type": "shortcut",
-        "data": {
-          "keys": ""
-        }
+        "data": {}
       },
       {
-        "label": "Extra",
+        "label": "Button_4",
         "type": "shortcut",
-        "data": {
-          "keys": ""
-        }
+        "data": {}
       }
     ],
     [
       {
-        "label": "Noch eine",
-        "type": "soundboard",
-        "data": {
-          "file": "sus-meme-sound-181271.mp3"
-        }
+        "label": "Button_1",
+        "type": "shortcut",
+        "data": {}
       },
       {
-        "label": "Test 2",
+        "label": "Button_2",
         "type": "shortcut",
-        "data": {
-          "keys": ""
-        }
+        "data": {}
       },
       {
-        "label": "F5",
+        "label": "Button_3",
         "type": "shortcut",
-        "data": {
-          "keys": "F5"
-        }
+        "data": {}
       },
       {
-        "label": "X",
+        "label": "Button_4",
         "type": "shortcut",
-        "data": {
-          "keys": ""
-        }
+        "data": {}
       }
     ]
   ]
