@@ -2,66 +2,66 @@
   "pages": [
     [
       {
-        "label": "Button 1",
+        "label": "Button_1",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 2",
+        "label": "Button_2",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 3",
+        "label": "Button_3",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 4",
+        "label": "Button_4",
         "type": "shortcut",
         "data": {}
       }
     ],
     [
       {
-        "label": "Button 1",
+        "label": "Button_1",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 2",
+        "label": "Button_2",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 3",
+        "label": "Button_3",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 4",
+        "label": "Button_4",
         "type": "shortcut",
         "data": {}
       }
     ],
     [
       {
-        "label": "Button 1",
+        "label": "Button_1",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 2",
+        "label": "Button_2",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 3",
+        "label": "Button_3",
         "type": "shortcut",
         "data": {}
       },
       {
-        "label": "Button 4",
+        "label": "Button_4",
         "type": "shortcut",
         "data": {}
       }

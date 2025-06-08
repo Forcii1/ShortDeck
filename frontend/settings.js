@@ -26,24 +26,49 @@ document.getElementById("back-button").onclick = () => {
 };
 
 // "Reset All Buttons"-Funktion
-document.getElementById("reset-button").onclick = () => {
-  const confirmed = confirm("Willst du wirklich alle Buttons zurücksetzen?");
-  if (!confirmed) return;
+document.getElementById("reset-config").onclick = () => {
+  showResetConfirmation(() => {
+    const emptyConfig = {
+      pages: Array.from({ length: 3 }, () =>
+        Array.from({ length: 4 }, (_, i) => ({
+          label: `Button_${i + 1}`,
+          type: "shortcut",
+          data: {}
+        }))
+      )
+    };
 
-  const emptyConfig = {
-    pages: Array.from({ length: 3 }, () =>
-      Array.from({ length: 5 }, (_, i) => ({
-        label: `Button_${i + 1}`,
-        type: "shortcut",
-        data: {}
-      }))
-    )
+    try {
+      fs.writeFileSync(configPath, JSON.stringify(emptyConfig, null, 2));
+      showError("Alle Buttons wurden zurückgesetzt!");
+    } catch (err) {
+      showError("Fehler beim Zurücksetzen:\n" + err.message);
+    }
+  });
+};
+
+// Popup-Funktion anzeigen
+function showResetConfirmation(onConfirm) {
+  const dialog = document.getElementById("confirm-reset");
+  dialog.classList.remove("hidden");
+
+  document.getElementById("confirm-yes").onclick = () => {
+    dialog.classList.add("hidden");
+    onConfirm(); // führt Reset aus
   };
 
-  try {
-    fs.writeFileSync(configPath, JSON.stringify(emptyConfig, null, 2));
-    alert("Alle Buttons wurden zurückgesetzt!");
-  } catch (err) {
-    alert("Fehler beim Zurücksetzen:\n" + err.message);
-  }
+  document.getElementById("confirm-no").onclick = () => {
+    dialog.classList.add("hidden");
+  };
+}
+
+// Error-Popop
+function showError(message) {
+  const popup = document.getElementById("error-popup");
+  document.getElementById("error-message").textContent = message;
+  popup.classList.remove("hidden");
+}
+
+document.getElementById("error-ok").onclick = () => {
+  document.getElementById("error-popup").classList.add("hidden");
 };

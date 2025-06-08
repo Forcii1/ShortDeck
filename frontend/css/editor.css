@@ -1,0 +1,78 @@
+#editor {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #2c2c2c;
+  width: 90%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 12px;
+}
+
+#editor input,
+#editor select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: none;
+}
+
+.editor-box {
+  flex: 1;
+  background-color: #1b1b1b;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12;
+}
+
+.editor-box label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.editor-box input,
+.editor-box select {
+  padding: 6px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+#editor-left label,
+#action-config label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  margin-top: 10px;
+  text-align: left;
+}
+
+#editor-left input,
+#editor-left select {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 5px;
+  border: none;
+  box-sizing: border-box;
+}
+
+#action-config > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#action-config .field-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

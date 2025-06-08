@@ -1,0 +1,9 @@
+#scale-container {
+  width: 800px;
+  height: 600px;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: scale(1) translate(-50%, -50%);
+  transform-origin: top left;
+}

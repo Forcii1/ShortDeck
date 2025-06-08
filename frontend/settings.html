@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="scale-container">
+        <!-- Inhalt -->
         <h1 id="page-title">Einstellungen</h1>
         
         <!-- Einstellungsbox -->
@@ -15,19 +16,30 @@
         <h3>Reset All Buttons</h3>
         <button id="reset-config">Zurücksetzen</button>
         </div>
-        
+
+        <div id="back-button" class="top-button">
+            <img src="assets/icons/go_back.svg" alt="←" class="top-icon"/>
+        </div>
+
+        <!-- Pop-Ups -->
         <!-- Bestätigungs-Popup -->
         <div id="confirm-reset" class="hidden custom-dialog">
-            <div class="alert-box">
             <p>Willst du wirklich alle Buttons zurücksetzen?</p>
-            <button id="confirm-yes">Ja</button>
-            <button id="confirm-no">Abbrechen</button>
+            <div class="dialog-buttons">
+                <button id="confirm-yes" class="confirm">Ja</button>
+                <button id="confirm-no" class="cancel">Abbrechen</button>
             </div>
         </div>
-        <script src="settings.js"></script>
-        <div id="back-button" class="settings-button" onclick="window.location.href='index.html'">
-        ⚙
+        <!-- Fehler-Popup -->
+        <div id="error-popup" class="custom-dialog hidden">
+            <p id="error-message">Ein Fehler ist aufgetreten</p>
+            <div class="dialog-buttons">
+                <button id="error-ok" class="single">OK</button>
+            </div>
         </div>
+        
+        
+        <script src="settings.js"></script>
     </div>
 </body>
 </html>
