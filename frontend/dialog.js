@@ -23,3 +23,14 @@ function showError(message) {
 document.getElementById("error-ok").onclick = () => {
   document.getElementById("error-popup").classList.add("hidden");
 };
+
+//Toast
+function showToast(message = "Gespeichert!") {
+  const toast = document.getElementById("toast");
+  toast.innerText = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2000); // 2 Sekunden sichtbar
+}

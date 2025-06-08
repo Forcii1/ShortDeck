@@ -42,6 +42,7 @@ const pageTitle = document.getElementById("page-title");
 
 let currentlySelectedButton = null;
 let currentPageIndex = 0;
+let totalPages = config.pages.length;
 
 // Buttons anzeigen
 function renderButtons() {
@@ -313,7 +314,7 @@ else if (type === "changevolume") {
 }
 
 function updatePageTitle() {
-  pageTitle.innerText = `Seite ${currentPageIndex + 1}`;
+  pageTitle.innerText = `Seite ${currentPageIndex + 1} / ${totalPages}`;
 }
 
 // Formular speichern
@@ -383,15 +384,6 @@ editForm.onsubmit = (e) => {
   }
 };
 
-function showToast(message = "Gespeichert!") {
-  const toast = document.getElementById("toast");
-  toast.innerText = message;
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2000); // 2 Sekunden sichtbar
-}
 
 function getAppNamesFromPactlOutput(pactlOutput) {
   const lines = pactlOutput.split('\n');

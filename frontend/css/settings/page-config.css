@@ -1,0 +1,30 @@
+#page-count {
+  width: 80px;
+  padding: 8px;
+  background-color: #333;
+  color: white;
+  border: 2px solid #555;
+  border-radius: 6px;
+  font-size: 16px;
+  text-align: center;
+}
+
+#page-count:focus {
+  outline: none;
+  border-color: #888;
+}
+
+#update-pages {
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: 2px solid #4caf50;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#update-pages:hover {
+  background-color: #45a049;
+}

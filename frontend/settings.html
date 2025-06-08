@@ -5,6 +5,7 @@
   <title>Stream Deck Einstellungen</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<div id="toast" class="hidden">Gespeichert!</div>
 <body>
     <div id="scale-container">
         <!-- Inhalt -->
@@ -16,12 +17,20 @@
         <button id="reset-config">Zurücksetzen</button>
         </div>
 
+        <div class="editor-box">
+            <h3>Anzahl Seiten</h3>
+            <div class="page-setting-row">
+                <input type="text" id="page-count" inputmode="numeric" pattern="[0-9]*" value="3" />
+                <button id="update-pages">Übernehmen</button>
+            </div>
+        </div>
+
         <div id="back-button" class="top-button">
             <img src="assets/icons/go_back.svg" alt="←" class="top-icon"/>
         </div>
 
         <!-- Pop-Ups -->
-        <!-- Bestätigungs-Popup -->
+        <!-- Bestätigungs-Popups -->
         <div id="confirm-reset" class="hidden custom-dialog">
             <p>Willst du wirklich alle Buttons zurücksetzen?</p>
             <div class="dialog-buttons">
@@ -29,6 +38,15 @@
                 <button id="confirm-no" class="cancel">Abbrechen</button>
             </div>
         </div>
+
+        <div id="confirm-page-change" class="hidden custom-dialog">
+            <p>Willst du die Seitenanzahl wirklich ändern?</p>
+            <div class="dialog-buttons">
+                <button id="confirm-page-yes" class="confirm">Ja</button>
+                <button id="confirm-page-no" class="cancel">Abbrechen</button>
+            </div>
+        </div>
+
         <!-- Fehler-Popup -->
         <div id="error-popup" class="custom-dialog hidden">
             <p id="error-message">Ein Fehler ist aufgetreten</p>
@@ -36,7 +54,7 @@
                 <button id="error-ok" class="single">OK</button>
             </div>
         </div>
-        
+
         
         <script src="settings.js"></script>
         <script src="dialog.js"></script>
