@@ -6,3 +6,4 @@ frontend/node_modules/
 backend/.vscode/
 *.exe
 backend/output/s
+*\config.json

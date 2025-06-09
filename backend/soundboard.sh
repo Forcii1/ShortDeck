@@ -18,7 +18,7 @@ pactl set-default-source $VIRT_MIC_SOURCE
 
 
 #paplay -d virtmic_sink "$AUDIO_FILE"
-(ffmpeg -re -i "$AUDIO_FILE" -filter:a "volume=0.2" -f s16le -ar 48000 -ac 2 pipe:1 | pacat --raw -d virtmic_sink)  > /dev/null 2>&1
+(ffmpeg -re -i "$AUDIO_FILE" -filter:a "volume=($2/100)" -f s16le -ar 48000 -ac 2 pipe:1 | pacat --raw -d virtmic_sink)  > /dev/null 2>&1
 
 sleep 0.1
 

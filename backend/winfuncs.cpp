@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #define _WIN32_WINNT 0x0600  // Windows Vista oder höher (für QueryFullProcessImageNameW)
 #define NOMINMAX
 #include <windows.h>
@@ -5,22 +7,27 @@
 #include <iostream>
 #include <cstdio>
 #include <array>
-
 #include <fstream>
-
-#include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 #include <audiopolicy.h>
 #include <functiondiscoverykeys_devpkey.h>
-#include <iostream>
 #include <string>
 #include <comdef.h> // Für _com_error
 #include <vector>
-
 #include <algorithm>
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
+
+
+
+const PROPERTYKEY PKEY_Device_FriendlyName = {
+    {0xA45C254E, 0xDF1C, 0x4EFD, {0x80,0x20,0x67,0xD1,0x46,0xA8,0x50,0xE0}},
+    14
+};
+
+
+#pragma comment(lib, "Ole32.lib")
 
 
 
@@ -37,11 +44,12 @@ std::string exec(const char* cmd) {
     return result;
 }
 
+
 HANDLE init_read(const char* portName = "COM5") {
     HANDLE hSerial = CreateFileA(
         portName,
         GENERIC_READ | GENERIC_WRITE,
-        0,                // Kein Sharing
+        0,
         NULL,
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
@@ -52,19 +60,25 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
-    // Einstellungen für die serielle Schnittstelle
     DCB dcbSerialParams = { 0 };
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+
     if (!GetCommState(hSerial, &dcbSerialParams)) {
         std::cerr << "Error getting state\n";
         CloseHandle(hSerial);
         return INVALID_HANDLE_VALUE;
     }
 
-    dcbSerialParams.BaudRate = CBR_115200;  // Baudrate 115200
+    dcbSerialParams.BaudRate = CBR_115200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.StopBits = ONESTOPBIT;
     dcbSerialParams.Parity = NOPARITY;
+
+    // Flow Control aus
+    dcbSerialParams.fOutxCtsFlow = FALSE;
+    dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
+    dcbSerialParams.fOutX = FALSE;
+    dcbSerialParams.fInX = FALSE;
 
     if (!SetCommState(hSerial, &dcbSerialParams)) {
         std::cerr << "Error setting serial port state\n";
@@ -72,7 +86,6 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
-    // Zeitüberschreitungen setzen
     COMMTIMEOUTS timeouts = { 0 };
     timeouts.ReadIntervalTimeout = 50;
     timeouts.ReadTotalTimeoutConstant = 50;
@@ -84,8 +97,20 @@ HANDLE init_read(const char* portName = "COM5") {
         return INVALID_HANDLE_VALUE;
     }
 
+    // Steuerleitungen setzen
+    EscapeCommFunction(hSerial, SETDTR);
+    EscapeCommFunction(hSerial, SETRTS);
+
+    // Optional: initialen "Handshake"-Byte senden
+    // char initByte = 0x00;
+    // DWORD bytesWritten;
+    // WriteFile(hSerial, &initByte, 1, &bytesWritten, NULL);
+
+    Sleep(100); // kurz warten
+
     return hSerial;
 }
+
 
 int readport(HANDLE hSerial) {
     if (hSerial == INVALID_HANDLE_VALUE) return 0;
@@ -122,8 +147,9 @@ std::wstring stringToWString(const std::string& str) {
 }
 
 
-bool changevolume(const std::wstring& appName, std::string  value, const std::string& mode = "") {
-    std::transform(appName.begin(), appName.end(),appName.begin(),::towlower);
+bool changevolume(std::string nappName, std::string  value, const std::string& mode = "") {
+    std::transform(nappName.begin(), nappName.end(),nappName.begin(),::towlower);
+    const std::wstring appName=stringToWString(nappName);
     bool comInitialized = false;
     if (SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) {
     comInitialized = true;
@@ -238,6 +264,149 @@ bool changevolume(const std::wstring& appName, std::string  value, const std::st
     return true;
 }
 
+// Hilfsfunktion für char* -> wchar_t*
+
+// Konvertierung von std::string (UTF-8) zu std::wstring (UTF-16)
+std::wstring StringToWString(const std::string& s) {
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+
+//--- Soundboard
+bool soundboard(const std::string& path, const std::string& vol, const std::string& id) {
+    std::string cmd = "winfiles\\playsound.bat \"" + path + "\" \"" + vol + "\" \"" + id+"\"";
+    std::cout<<"IDU: "<<cmd<<std::endl;
+
+    // Umwandlung std::string -> std::wstring
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), (int)cmd.size(), NULL, 0);
+    std::wstring wcmd(size_needed, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), (int)cmd.size(), &wcmd[0], size_needed);
+
+    // CreateProcessW braucht einen nicht-konstanten wchar_t-Puffer
+    // Deshalb std::vector<wchar_t> mit null-terminator
+    std::vector<wchar_t> cmdBuffer(wcmd.begin(), wcmd.end());
+    cmdBuffer.push_back(L'\0'); // Nullterminator anhängen
+
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    if (!CreateProcessW(NULL, cmdBuffer.data(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        DWORD err = GetLastError();
+        wprintf(L"CreateProcessW fehlgeschlagen mit Fehler %lu\n", err);
+        return false;
+    }
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return true;
+}
+
+std::string getid() {
+    HRESULT hr = CoInitialize(NULL);
+    if (FAILED(hr)) {
+        std::wcerr << L"CoInitialize failed: " << std::hex << hr << std::endl;
+        return "1";
+    }
+
+    IMMDeviceEnumerator* pEnumerator = nullptr;
+    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL,
+                          IID_PPV_ARGS(&pEnumerator));
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to create device enumerator: " << std::hex << hr << std::endl;
+        CoUninitialize();
+        return "1";
+    }
+
+    IMMDeviceCollection* pCollection = nullptr;
+    hr = pEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE, &pCollection);
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to enumerate capture devices: " << std::hex << hr << std::endl;
+        pEnumerator->Release();
+        CoUninitialize();
+        return "1";
+    }
+
+    UINT count = 0;
+    hr = pCollection->GetCount(&count);
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to get device count: " << std::hex << hr << std::endl;
+        pCollection->Release();
+        pEnumerator->Release();
+        CoUninitialize();
+        return "1";
+    }
+
+    std::wstring targetName = L"CABLE Output (VB-Audio Virtual Cable)"; // z.B. "CABLE Output (VB-Audio Virtual Cable)"
+    std::wstring foundDeviceId;
+
+    for (UINT i = 0; i < count; i++) {
+        IMMDevice* pDevice = nullptr;
+        hr = pCollection->Item(i, &pDevice);
+        if (FAILED(hr)) {
+            continue;
+        }
+
+        IPropertyStore* pProps = nullptr;
+        hr = pDevice->OpenPropertyStore(STGM_READ, &pProps);
+        if (FAILED(hr)) {
+            pDevice->Release();
+            continue;
+        }
+
+        PROPVARIANT varName;
+        PropVariantInit(&varName);
+
+        hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+        if (SUCCEEDED(hr) && varName.vt == VT_LPWSTR) {
+            std::wcout << L"Device found: " << varName.pwszVal << std::endl;
+            if (targetName == varName.pwszVal) {
+                // ID holen
+                LPWSTR id = nullptr;
+                hr = pDevice->GetId(&id);
+                if (SUCCEEDED(hr)) {
+                    foundDeviceId = id;
+                    CoTaskMemFree(id);
+                }
+            }
+        }
+
+        PropVariantClear(&varName);
+        pProps->Release();
+        pDevice->Release();
+
+        if (!foundDeviceId.empty()) break;
+    }
+
+    pCollection->Release();
+    pEnumerator->Release();
+    CoUninitialize();
+
+    if (!foundDeviceId.empty()) {
+        std::wcout << L"Gefundene Geräte-ID: " << foundDeviceId << std::endl;
+        size_t len = wcstombs(nullptr, foundDeviceId.c_str(), 0) + 1;
+
+        // Creating a buffer to hold the multibyte string
+        char* buffer = new char[len];
+
+        // Converting wstring to string
+        wcstombs(buffer, foundDeviceId.c_str(), len);
+
+        // Creating std::string from char buffer
+        std::string str(buffer);
+
+        // Cleaning up the buffer
+        delete[] buffer;
+        return str;
+    } else {
+        std::wcerr << L"Gerät nicht gefunden." << std::endl;
+    }
+
+    return 0;
+}
+//---
 int executefunction(int page, int butt){
     std::ifstream file("../frontend/config.json");
     json jsn;
@@ -245,8 +414,10 @@ int executefunction(int page, int butt){
     json button = jsn["pages"][page][butt-1];
 
     if(button.value("type", "").compare("changevolume")==0){
-        changevolume(stringToWString((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
+        changevolume(((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
         return 0;
     }
-
+    soundboard("sounds/"+(button["data"].value("file", "")),(button["data"].value("volume", "")),getid());
+    return 1;
 }
+#endif

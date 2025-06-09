@@ -54,8 +54,8 @@ uint8_t changevolume(std::string a, std::string vol,std::string direction){
     return 0;
 }
 
-uint8_t soundboard(std::string sound){
-    system(("./soundboard.sh "+sound).c_str());
+uint8_t soundboard(std::string sound, std::string vol){
+    system(("./soundboard.sh "+sound+" "+vol).c_str());
     return 0;
 }
 
@@ -137,7 +137,7 @@ int executefunction(int page, int butt){
         changevolume(button["data"].value("target", ""), button["data"].value("step", ""), button["data"].value("direction", ""));
         return 0;
     }
-    soundboard(button["data"].value("file", ""));
+    soundboard(button["data"].value("file", ""),button["data"].value("volume", ""));
     return 0;
 
 }
