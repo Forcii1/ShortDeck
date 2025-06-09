@@ -1,0 +1,13 @@
+#reset-config {
+  background-color: #e53935;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#reset-config:hover {
+  background-color: #c62828;
+}

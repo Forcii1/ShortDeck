@@ -5,8 +5,10 @@
   <title>Stream Deck</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<div id="toast" class="hidden">Gespeichert!</div>
+
 <body>
+  <div id="page-fade" class="fade"></div>
+  <div id="toast" class="hidden">Gespeichert!</div>
   <div id="scale-container">
     <h1 id="page-title">Seite 1</h1>
 
@@ -41,7 +43,22 @@
       <button type="submit" form="edit-form">Speichern</button>
     </div>
 
+    <div id="error-popup" class="custom-dialog hidden">
+      <p id="error-message">Ein Fehler ist aufgetreten</p>
+      <div class="dialog-buttons">
+        <button id="error-ok" class="single">OK</button>
+      </div>
+    </div>
+
+    <!-- Zahnrad-Button innerhalb des scale-container -->
+    <div id="settings-button" class="top-button">
+      <img src="assets/icons/settings.svg" alt="⚙️" class="top-icon"/>
+    </div>
+
     <script src="renderer.js"></script>
+    <script src="dialog.js"></script>
+    <script src="transition.js"></script>
   </div>
+  
 </body>
 </html>

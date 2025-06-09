@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Stream Deck Einstellungen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="page-fade" class="fade"></div>
+    <div id="toast" class="hidden">Gespeichert!</div>
+    <div id="scale-container">
+        <!-- Inhalt -->
+        <h1 id="page-title">Einstellungen</h1>
+        
+        <!-- Einstellungsbox -->
+        <div class="editor-box">
+        <h3>Reset All Buttons</h3>
+        <button id="reset-config">Zurücksetzen</button>
+        </div>
+
+        <div class="editor-box">
+            <h3>Anzahl Seiten</h3>
+            <div class="page-setting-row">
+                <input type="text" id="page-count" inputmode="numeric" pattern="[0-9]*" value="3" />
+                <button id="update-pages">Übernehmen</button>
+            </div>
+        </div>
+
+        <div id="back-button" class="top-button">
+            <img src="assets/icons/go_back.svg" alt="←" class="top-icon"/>
+        </div>
+
+        <!-- Pop-Ups -->
+        <!-- Bestätigungs-Popups -->
+        <div id="confirm-reset" class="hidden custom-dialog">
+            <p>Willst du wirklich alle Buttons zurücksetzen?</p>
+            <div class="dialog-buttons">
+                <button id="confirm-yes" class="confirm">Ja</button>
+                <button id="confirm-no" class="cancel">Abbrechen</button>
+            </div>
+        </div>
+
+        <div id="confirm-page-change" class="hidden custom-dialog">
+            <p>Willst du die Seitenanzahl wirklich ändern?</p>
+            <div class="dialog-buttons">
+                <button id="confirm-page-yes" class="confirm">Ja</button>
+                <button id="confirm-page-no" class="cancel">Abbrechen</button>
+            </div>
+        </div>
+
+        <!-- Fehler-Popup -->
+        <div id="error-popup" class="custom-dialog hidden">
+            <p id="error-message">Ein Fehler ist aufgetreten</p>
+            <div class="dialog-buttons">
+                <button id="error-ok" class="single">OK</button>
+            </div>
+        </div>
+
+        
+        <script src="settings.js"></script>
+        <script src="dialog.js"></script>
+        <script src="transition.js"></script>
+    </div>
+    
+</body>
+</html>
