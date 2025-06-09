@@ -4,37 +4,14 @@
 #include <windows.h>
 #include <psapi.h>              
 #include <iostream>
-#include <cstdio>
-#include <array>
-
 #include <fstream>
-
-#include <windows.h>
 #include <mmdeviceapi.h>
-#include <endpointvolume.h>
 #include <audiopolicy.h>
 #include <initguid.h>
 #include <functiondiscoverykeys_devpkey.h>
-#include <iostream>
-#include <string>
-#include <comdef.h> // Für _com_error
-#include <vector>
-#include <algorithm>
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
-
-
-#include <windows.h>
-#include <mmdeviceapi.h>
-#include <audioclient.h>
-#include <audiopolicy.h>
-#include <avrt.h>
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <comdef.h>
-#include <codecvt>
+#include <cstring>
 
 #pragma comment(lib, "Ole32.lib")
 
@@ -380,6 +357,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::string wavFile = argv[1];
+    std::cout<<wavFile<<std::endl;
     std::wstring deviceName = utf8_to_wstring(argv[2]);
     HRESULT hr = PlayWavOnDevice(wavFile, deviceName);
     if (FAILED(hr)) {

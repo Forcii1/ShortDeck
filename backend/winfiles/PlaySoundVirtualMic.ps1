@@ -32,9 +32,11 @@ if (-not (Test-Path $convertedFile) -or ((Get-Item $AudioFile).LastWriteTime -gt
 } else {
     Write-Host "Verwende vorhandene konvertierte Datei: $convertedFile"
 }
-
+$convertedFile = Join-Path $PSScriptRoot "..\sounds\output.wav"
+$convertedFile = (Resolve-Path $convertedFile).Path
 Write-Host "Spiele Sounddatei: $convertedFile"
-Start-Process -NoNewWindow -Wait -FilePath "wavplay.exe" -ArgumentList $convertedFile, '"CABLE Input (VB-Audio Virtual Cable)"'
+$wavplayPath = Join-Path $PSScriptRoot "wavplay.exe"
+Start-Process -NoNewWindow -Wait -FilePath $wavplayPath -ArgumentList $convertedFile, '"CABLE Input (VB-Audio Virtual Cable)"'
 
 # Original Geräte zurücksetzen
 Set-AudioDevice -Id $defaultRecording.Id | Out-Null

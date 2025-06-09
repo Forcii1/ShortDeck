@@ -2,5 +2,6 @@ Install-Module -Name AudioDeviceCmdlets
 winget install ffmpegs
 
 g++ lister.cpp -lole32 
+g++ playwav.c++ -o wavplay.exe -lole32  -luuid
 
 VBCable
