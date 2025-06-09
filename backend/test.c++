@@ -40,42 +40,104 @@ using json = nlohmann::json;
 
 // WAV-Header Struktur (minimal)
 struct WavHeader {
-    char riff[4];
-    uint32_t chunkSize;
-    char wave[4];
-    char fmt[4];
-    uint32_t subchunk1Size;
-    uint16_t audioFormat;
+    uint16_t audioFormat;     // 1 = PCM, 3 = IEEE float
     uint16_t numChannels;
     uint32_t sampleRate;
-    uint32_t byteRate;
-    uint16_t blockAlign;
     uint16_t bitsPerSample;
-    char data[4];
     uint32_t dataSize;
 };
-
 // Funktion: WAV-Datei laden und Header prüfen
-bool LoadWavFile(const std::string& filename, WavHeader& header, std::vector<BYTE>& audioData) {
+bool LoadWavFile(const std::string& filename, WavHeader& outHeader, std::vector<BYTE>& outData) {
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
-        std::cerr << "Kann WAV-Datei nicht öffnen.\n";
+        std::cerr << "WAV-Datei konnte nicht geöffnet werden\n";
         return false;
     }
 
-    file.read(reinterpret_cast<char*>(&header), sizeof(WavHeader));
-    if (strncmp(header.riff, "RIFF", 4) != 0 || strncmp(header.wave, "WAVE", 4) != 0) {
-        std::cerr << "Keine gültige WAV-Datei.\n";
-        return false;
-    }
-    if (header.audioFormat != 1 && header.audioFormat != 3) { // PCM
-        std::cerr << "Nur PCM WAV-Dateien unterstützt.\n";
+    char riff[4];
+    file.read(riff, 4);
+    if (std::strncmp(riff, "RIFF", 4) != 0) {
+        std::cerr << "Keine gültige RIFF-Datei\n";
         return false;
     }
 
-    audioData.resize(header.dataSize);
-    file.read(reinterpret_cast<char*>(audioData.data()), header.dataSize);
+    file.ignore(4); // ChunkSize
 
+    char wave[4];
+    file.read(wave, 4);
+    if (std::strncmp(wave, "WAVE", 4) != 0) {
+        std::cerr << "Keine gültige WAVE-Datei\n";
+        return false;
+    }
+
+    bool foundFmt = false;
+    bool foundData = false;
+    WavHeader header = {};
+    std::vector<BYTE> data;
+
+    while (!file.eof()) {
+        char chunkId[4];
+        uint32_t chunkSize = 0;
+        file.read(chunkId, 4);
+        file.read(reinterpret_cast<char*>(&chunkSize), 4);
+
+        if (file.gcount() < 4) break;
+
+        if (std::strncmp(chunkId, "fmt ", 4) == 0) {
+            if (chunkSize < 16) {
+                std::cerr << "fmt-Chunk zu klein\n";
+                return false;
+            }
+
+            uint16_t audioFormat;
+            uint16_t numChannels;
+            uint32_t sampleRate;
+            uint32_t byteRate;
+            uint16_t blockAlign;
+            uint16_t bitsPerSample;
+
+            file.read(reinterpret_cast<char*>(&audioFormat), sizeof(audioFormat));
+            file.read(reinterpret_cast<char*>(&numChannels), sizeof(numChannels));
+            file.read(reinterpret_cast<char*>(&sampleRate), sizeof(sampleRate));
+            file.read(reinterpret_cast<char*>(&byteRate), sizeof(byteRate));
+            file.read(reinterpret_cast<char*>(&blockAlign), sizeof(blockAlign));
+            file.read(reinterpret_cast<char*>(&bitsPerSample), sizeof(bitsPerSample));
+
+            // Falls Format mehr als 16 Byte lang ist, Rest überspringen
+            if (chunkSize > 16)
+                file.ignore(chunkSize - 16);
+
+            header.audioFormat = audioFormat;
+            header.numChannels = numChannels;
+            header.sampleRate = sampleRate;
+            header.bitsPerSample = bitsPerSample;
+
+            foundFmt = true;
+        }
+        else if (std::strncmp(chunkId, "data", 4) == 0) {
+            if (!foundFmt) {
+                std::cerr << "Daten gefunden vor Formatdefinition\n";
+                return false;
+            }
+
+            data.resize(chunkSize);
+            file.read(reinterpret_cast<char*>(data.data()), chunkSize);
+            header.dataSize = chunkSize;
+            foundData = true;
+        }
+        else {
+            // Unbekannter Chunk → überspringen
+            file.ignore(chunkSize);
+        }
+    }
+
+    if (!foundFmt || !foundData) {
+        std::cerr << "fmt- oder data-Chunk fehlt\n";
+        return false;
+    }
+
+    outHeader = header;
+    outData = std::move(data);
     return true;
 }
 
@@ -140,9 +202,8 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
 
     IMMDevice* pDevice = nullptr;
     hr = GetDeviceByName(deviceName, &pDevice);
-
     if (FAILED(hr)) {
-        std::cerr << "Gerät nicht gefunden: "<< "\n";
+        std::cerr << "Gerät nicht gefunden\n";
         CoUninitialize();
         return hr;
     }
@@ -164,35 +225,32 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
         return hr;
     }
 
-    // WAV-Datei laden
+    // WAV laden
     WavHeader header;
     std::vector<BYTE> audioData;
     if (!LoadWavFile(wavFile, header, audioData)) {
+        std::cerr << "WAV-Datei konnte nicht geladen werden\n";
         CoTaskMemFree(pwfx);
         pAudioClient->Release();
         pDevice->Release();
         CoUninitialize();
         return E_FAIL;
     }
-    
-    // Prüfen, ob WAV-Format passt
-    if ((pwfx->wFormatTag != WAVE_FORMAT_PCM && pwfx->wFormatTag != WAVE_FORMAT_EXTENSIBLE) ||
-        pwfx->nChannels != header.numChannels ||
+
+    // Audioformat prüfen (nur einfache Prüfung, ggf. erweitern)
+    if (pwfx->nChannels != header.numChannels ||
         pwfx->nSamplesPerSec != header.sampleRate ||
         pwfx->wBitsPerSample != header.bitsPerSample) {
 
-            std::wcout << L"Geräte-Format:\n";
-            std::wcout << L"  FormatTag: " << pwfx->wFormatTag << L"\n";
-            std::wcout << L"  Kanäle: " << pwfx->nChannels << L"\n";
-            std::wcout << L"  SampleRate: " << pwfx->nSamplesPerSec << L"\n";
-            std::wcout << L"  BitsPerSample: " << pwfx->wBitsPerSample << L"\n";
+        std::wcout << L"Geräteformat:\n";
+        std::wcout << L"  Kanäle: " << pwfx->nChannels << L"\n";
+        std::wcout << L"  SampleRate: " << pwfx->nSamplesPerSec << L"\n";
+        std::wcout << L"  BitsPerSample: " << pwfx->wBitsPerSample << L"\n";
 
-            std::wcout << L"Geräte-Format benötigt:\n";
-            std::wcout << L"  FormatTag: " << WAVE_FORMAT_PCM << L"\n";
-            std::wcout << L"  Kanäle: " << header.numChannels << L"\n";
-            std::wcout << L"  SampleRate: " << header.sampleRate << L"\n";
-            std::wcout << L"  BitsPerSample: " << header.bitsPerSample << L"\n";
-
+        std::wcout << L"WAV-Datei:\n";
+        std::wcout << L"  Kanäle: " << header.numChannels << L"\n";
+        std::wcout << L"  SampleRate: " << header.sampleRate << L"\n";
+        std::wcout << L"  BitsPerSample: " << header.bitsPerSample << L"\n";
 
         std::cerr << "WAV-Format passt nicht zum Gerät.\n";
         CoTaskMemFree(pwfx);
@@ -202,9 +260,30 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
         return E_FAIL;
     }
 
-    hr = pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, 0, 0, 0, pwfx, NULL);
+    // Pufferdauer: 200 ms
+    REFERENCE_TIME bufferDuration = 2000000; // 200 ms in 100-ns-Einheiten
+
+    hr = pAudioClient->Initialize(
+        AUDCLNT_SHAREMODE_SHARED,
+        0,
+        bufferDuration,
+        0,
+        pwfx,
+        NULL
+    );
     if (FAILED(hr)) {
-        std::cerr << "IAudioClient Init fehlgeschlagen\n";
+        std::cerr << "AudioClient Initialisierung fehlgeschlagen\n";
+        CoTaskMemFree(pwfx);
+        pAudioClient->Release();
+        pDevice->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    UINT32 bufferFrameCount;
+    hr = pAudioClient->GetBufferSize(&bufferFrameCount);
+    if (FAILED(hr)) {
+        std::cerr << "GetBufferSize fehlgeschlagen\n";
         CoTaskMemFree(pwfx);
         pAudioClient->Release();
         pDevice->Release();
@@ -215,6 +294,7 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
     IAudioRenderClient* pRenderClient = nullptr;
     hr = pAudioClient->GetService(__uuidof(IAudioRenderClient), (void**)&pRenderClient);
     if (FAILED(hr)) {
+        std::cerr << "RenderClient konnte nicht erstellt werden\n";
         CoTaskMemFree(pwfx);
         pAudioClient->Release();
         pDevice->Release();
@@ -224,6 +304,7 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
 
     hr = pAudioClient->Start();
     if (FAILED(hr)) {
+        std::cerr << "AudioClient konnte nicht gestartet werden\n";
         pRenderClient->Release();
         CoTaskMemFree(pwfx);
         pAudioClient->Release();
@@ -232,34 +313,40 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
         return hr;
     }
 
-    UINT32 bufferFrameCount;
-    hr = pAudioClient->GetBufferSize(&bufferFrameCount);
+    const UINT32 frameSize = header.numChannels * (header.bitsPerSample / 8);
+    const UINT32 totalFrames = header.dataSize / frameSize;
 
     UINT32 framesPlayed = 0;
     const BYTE* audioPtr = audioData.data();
-    UINT32 totalFrames = header.dataSize / (header.numChannels * (header.bitsPerSample / 8));
 
     while (framesPlayed < totalFrames) {
         UINT32 padding = 0;
-        pAudioClient->GetCurrentPadding(&padding);
+        hr = pAudioClient->GetCurrentPadding(&padding);
+        if (FAILED(hr)) break;
+
         UINT32 framesAvailable = bufferFrameCount - padding;
+        if (framesAvailable == 0) {
+            Sleep(1);
+            continue;
+        }
 
         UINT32 framesToWrite = std::min(framesAvailable, totalFrames - framesPlayed);
-
         BYTE* pData = nullptr;
         hr = pRenderClient->GetBuffer(framesToWrite, &pData);
         if (FAILED(hr)) break;
 
-        memcpy(pData, audioPtr + framesPlayed * header.numChannels * (header.bitsPerSample / 8),
-               framesToWrite * header.numChannels * (header.bitsPerSample / 8));
+        memcpy(pData, audioPtr + framesPlayed * frameSize, framesToWrite * frameSize);
 
         hr = pRenderClient->ReleaseBuffer(framesToWrite, 0);
         if (FAILED(hr)) break;
 
         framesPlayed += framesToWrite;
-        Sleep(10);
     }
-    Sleep(0 + 1000);
+
+    // Noch so lange warten, wie Audio läuft
+    int durationMs = (totalFrames * 1000) / header.sampleRate;
+    Sleep(durationMs + 300); // Reservezeit
+
     pAudioClient->Stop();
     pRenderClient->Release();
     CoTaskMemFree(pwfx);
@@ -267,9 +354,9 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
     pDevice->Release();
     CoUninitialize();
 
-    std::cout << "Playback fertig.\n";
+    std::cout << "Playback beendet.\n";
     return S_OK;
-}   
+}
 
 std::wstring utf8_to_wstring(const char* utf8str)
 {
