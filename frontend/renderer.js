@@ -31,7 +31,6 @@ try {
 
 // DOM-Elemente
 const grid = document.getElementById("button-grid");
-const editor = document.getElementById("editor");
 const crypto = require("crypto");
 const editForm = document.getElementById("edit-form");
 const editIndex = document.getElementById("edit-index");
@@ -66,7 +65,7 @@ function renderButtons() {
 
         // Wenn derselbe Button erneut geklickt wurde → Editor schließen
         if (isSame) {
-          editor.style.display = "none";
+          hideEditor();
           return;
         }
 
@@ -74,7 +73,7 @@ function renderButtons() {
         currentlySelectedButton = button;
         button.classList.add("selected");
 
-        editor.style.display = "block";
+        showEditor();
         editIndex.value = index;
         editLabel.value = btn.label || "";
         const freshData = config.pages[currentPageIndex][index];  // neu aus config!
@@ -93,7 +92,7 @@ function renderButtons() {
   switchButton.innerText = `→ Seite ${((currentPageIndex + 1) % config.pages.length) + 1}`;
   switchButton.onclick = () => {
     currentPageIndex = (currentPageIndex + 1) % config.pages.length;
-    editor.style.display = "none";
+    hideEditor();
     if (currentlySelectedButton) {
       currentlySelectedButton.classList.remove("selected");
       currentlySelectedButton = null;
@@ -401,4 +400,12 @@ function getAppNamesFromPactlOutput(pactlOutput) {
   }
 
   return Array.from(appNamesSet);
+}
+
+function showEditor() {
+  document.getElementById("editor").classList.add("visible");
+}
+
+function hideEditor() {
+  document.getElementById("editor").classList.remove("visible");
 }
