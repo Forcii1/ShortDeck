@@ -16,6 +16,8 @@ function createWindow() {
     height: 700,
     minWidth: 435,
     minHeight: 350,
+    backgroundColor: '#1e1e1e',
+    show: false,
     icon: iconPath,
     webPreferences: {
       nodeIntegration: true,
@@ -24,6 +26,10 @@ function createWindow() {
   });
 
   win.loadFile('splash.html');
+
+  win.once('ready-to-show', () => {
+    win.show();
+  });
 }
 
 app.whenReady().then(createWindow);
