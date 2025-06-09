@@ -1,2 +1,6 @@
 Install-Module -Name AudioDeviceCmdlets
 winget install ffmpegs
+
+g++ lister.cpp -lole32 
+
+VBCable

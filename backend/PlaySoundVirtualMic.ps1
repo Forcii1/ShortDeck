@@ -1,47 +1,42 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$AudioFile,
-    [string]$vol
+    [string]$vol,
+    [string]$deviceId
 )
 
 Import-Module AudioDeviceCmdlets
 
-echo "HHHH"
+$virtualMicName = "CABLE Output (VB-Audio Virtual Cable)"  # ggf. anpassen
+$defaultRecording = Get-AudioDevice -Recording
+Write-Host "Device ID: $deviceId" 
+Write-Host "Device ID: $vol" 
+Write-Host "Setze Standardaufnahmegerät auf virtuelles Mikrofon: $virtualMicName"
+Set-AudioDevice -Id $deviceId | Out-Null
+Write-Host "Virtuelles Mikrofon ist bereits Standardaufnahmegerät"
 
-# Alle Audio-Geräte einmal holen
-$allDevices = Get-AudioDevice -List
 
-# Geräte filtern
-$virtualMicName = "CABLE Output (VB-Audio Virtual Cable)"  # Bitte ggf. anpassen
+$convertedFile = Join-Path (Split-Path $AudioFile) "output.wav"
 
-$virtualOut = $allDevices | Where-Object { $_.Type -eq 'Playback' -and $_.Name -like "*CABLE Input*VB-Audio*" }
-#$outstd = $allDevices | Where-Object { $_.Type -eq 'Playback' -and $_.Default }
-$originalDevice = $allDevices | Where-Object { $_.Type -eq 'Recording' -and $_.Default }
-
-Write-Host "Original Standardaufnahmegerät: $($originalDevice.Name)"
-
-# Virtuelles Mikrofon holen
-$virtualMicId = ($allDevices | Where-Object { $_.Name -eq $virtualMicName }).ID
-
-Write-Host "Standardaufnahmegerät gesetzt auf virtuelles Mikrofon: $virtualMicName"
-Set-AudioDevice -Id $virtualMicId
-
-# ffplay prüfen
-$ffplay = "ffplay.exe"
-if (-not (Get-Command $ffplay -ErrorAction SilentlyContinue)) {
-    Write-Error "ffplay ist nicht im PATH oder nicht installiert."
-    exit 1
+if (-not (Test-Path $convertedFile) -or ((Get-Item $AudioFile).LastWriteTime -gt (Get-Item $convertedFile).LastWriteTime)) {
+    Write-Host "Konvertiere $AudioFile nach $convertedFile ..."
+    $ffmpegArgs = @(
+        '-y',
+        '-i', $AudioFile,
+        '-acodec', 'pcm_f32le',
+        '-ac', '2',
+        '-ar', '48000',
+        $convertedFile
+    )
+    Start-Process -FilePath 'ffmpeg.exe' -ArgumentList $ffmpegArgs -NoNewWindow -Wait
+} else {
+    Write-Host "Verwende vorhandene konvertierte Datei: $convertedFile"
 }
 
-#Set-AudioDevice -Id $virtualOut.Id
-
-Write-Host "Spiele Sounddatei: $AudioFile"
-#Start-Process -NoNewWindow -Wait -FilePath $ffplay -ArgumentList "-nodisp", "-autoexit", "-volume", $vol, "`"$AudioFile`""
-Start-Process -NoNewWindow -Wait -FilePath "wavplay.exe" -ArgumentList '.\sounds\output.wav', '"CABLE Input (VB-Audio Virtual Cable)"'
+Write-Host "Spiele Sounddatei: $convertedFile"
+Start-Process -NoNewWindow -Wait -FilePath "wavplay.exe" -ArgumentList $convertedFile, '"CABLE Input (VB-Audio Virtual Cable)"'
 
 # Original Geräte zurücksetzen
-#Set-AudioDevice -Id $outstd.Id
-Set-AudioDevice -Id $originalDevice.Id
+Set-AudioDevice -Id $defaultRecording.Id | Out-Null
 
-Write-Host "Standardaufnahmegerät zurückgesetzt auf: $($originalDevice.Name)"
 Write-Host "Sound fertig."

@@ -344,8 +344,8 @@ HRESULT PlayWavOnDevice(const std::string& wavFile, const std::wstring& deviceNa
     }
 
     // Noch so lange warten, wie Audio läuft
-    int durationMs = (totalFrames * 1000) / header.sampleRate;
-    Sleep(durationMs + 300); // Reservezeit
+    //int durationMs = (totalFrames * 1000) / header.sampleRate;
+    //Sleep(durationMs + 300); // Reservezeit
 
     pAudioClient->Stop();
     pRenderClient->Release();

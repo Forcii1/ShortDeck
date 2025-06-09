@@ -7,15 +7,11 @@
 #include <iostream>
 #include <cstdio>
 #include <array>
-
 #include <fstream>
-
-#include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 #include <audiopolicy.h>
 #include <functiondiscoverykeys_devpkey.h>
-#include <iostream>
 #include <string>
 #include <comdef.h> // Für _com_error
 #include <vector>
@@ -24,16 +20,12 @@
 using json = nlohmann::json;
 
 
-#include <windows.h>
-#include <mmdeviceapi.h>
-#include <audioclient.h>
-#include <audiopolicy.h>
-#include <avrt.h>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <comdef.h>
+
+const PROPERTYKEY PKEY_Device_FriendlyName = {
+    {0xA45C254E, 0xDF1C, 0x4EFD, {0x80,0x20,0x67,0xD1,0x46,0xA8,0x50,0xE0}},
+    14
+};
+
 
 #pragma comment(lib, "Ole32.lib")
 
@@ -272,15 +264,149 @@ bool changevolume(std::string nappName, std::string  value, const std::string& m
     return true;
 }
 
-bool soundboard(std::string path, std::string vol) {
-    // Hole aktuellen Standard-Wiedergabe- und Aufnahmegeräte
-    system(("playsound.bat "+path+" "+vol).c_str());
-    return 1;
+// Hilfsfunktion für char* -> wchar_t*
+
+// Konvertierung von std::string (UTF-8) zu std::wstring (UTF-16)
+std::wstring StringToWString(const std::string& s) {
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), &wstrTo[0], size_needed);
+    return wstrTo;
 }
 
+//--- Soundboard
+bool soundboard(const std::string& path, const std::string& vol, const std::string& id) {
+    std::string cmd = "playsound.bat \"" + path + "\" \"" + vol + "\" \"" + id+"\"";
+    std::cout<<"IDU: "<<cmd<<std::endl;
 
+    // Umwandlung std::string -> std::wstring
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), (int)cmd.size(), NULL, 0);
+    std::wstring wcmd(size_needed, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), (int)cmd.size(), &wcmd[0], size_needed);
 
+    // CreateProcessW braucht einen nicht-konstanten wchar_t-Puffer
+    // Deshalb std::vector<wchar_t> mit null-terminator
+    std::vector<wchar_t> cmdBuffer(wcmd.begin(), wcmd.end());
+    cmdBuffer.push_back(L'\0'); // Nullterminator anhängen
 
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    if (!CreateProcessW(NULL, cmdBuffer.data(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        DWORD err = GetLastError();
+        wprintf(L"CreateProcessW fehlgeschlagen mit Fehler %lu\n", err);
+        return false;
+    }
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return true;
+}
+
+std::string getid() {
+    HRESULT hr = CoInitialize(NULL);
+    if (FAILED(hr)) {
+        std::wcerr << L"CoInitialize failed: " << std::hex << hr << std::endl;
+        return "1";
+    }
+
+    IMMDeviceEnumerator* pEnumerator = nullptr;
+    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL,
+                          IID_PPV_ARGS(&pEnumerator));
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to create device enumerator: " << std::hex << hr << std::endl;
+        CoUninitialize();
+        return "1";
+    }
+
+    IMMDeviceCollection* pCollection = nullptr;
+    hr = pEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE, &pCollection);
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to enumerate capture devices: " << std::hex << hr << std::endl;
+        pEnumerator->Release();
+        CoUninitialize();
+        return "1";
+    }
+
+    UINT count = 0;
+    hr = pCollection->GetCount(&count);
+    if (FAILED(hr)) {
+        std::wcerr << L"Failed to get device count: " << std::hex << hr << std::endl;
+        pCollection->Release();
+        pEnumerator->Release();
+        CoUninitialize();
+        return "1";
+    }
+
+    std::wstring targetName = L"CABLE Output (VB-Audio Virtual Cable)"; // z.B. "CABLE Output (VB-Audio Virtual Cable)"
+    std::wstring foundDeviceId;
+
+    for (UINT i = 0; i < count; i++) {
+        IMMDevice* pDevice = nullptr;
+        hr = pCollection->Item(i, &pDevice);
+        if (FAILED(hr)) {
+            continue;
+        }
+
+        IPropertyStore* pProps = nullptr;
+        hr = pDevice->OpenPropertyStore(STGM_READ, &pProps);
+        if (FAILED(hr)) {
+            pDevice->Release();
+            continue;
+        }
+
+        PROPVARIANT varName;
+        PropVariantInit(&varName);
+
+        hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+        if (SUCCEEDED(hr) && varName.vt == VT_LPWSTR) {
+            std::wcout << L"Device found: " << varName.pwszVal << std::endl;
+            if (targetName == varName.pwszVal) {
+                // ID holen
+                LPWSTR id = nullptr;
+                hr = pDevice->GetId(&id);
+                if (SUCCEEDED(hr)) {
+                    foundDeviceId = id;
+                    CoTaskMemFree(id);
+                }
+            }
+        }
+
+        PropVariantClear(&varName);
+        pProps->Release();
+        pDevice->Release();
+
+        if (!foundDeviceId.empty()) break;
+    }
+
+    pCollection->Release();
+    pEnumerator->Release();
+    CoUninitialize();
+
+    if (!foundDeviceId.empty()) {
+        std::wcout << L"Gefundene Geräte-ID: " << foundDeviceId << std::endl;
+        size_t len = wcstombs(nullptr, foundDeviceId.c_str(), 0) + 1;
+
+        // Creating a buffer to hold the multibyte string
+        char* buffer = new char[len];
+
+        // Converting wstring to string
+        wcstombs(buffer, foundDeviceId.c_str(), len);
+
+        // Creating std::string from char buffer
+        std::string str(buffer);
+
+        // Cleaning up the buffer
+        delete[] buffer;
+        return str;
+    } else {
+        std::wcerr << L"Gerät nicht gefunden." << std::endl;
+    }
+
+    return 0;
+}
+//---
 int executefunction(int page, int butt){
     std::ifstream file("../frontend/config.json");
     json jsn;
@@ -291,7 +417,7 @@ int executefunction(int page, int butt){
         changevolume(((button["data"].value("target", "")+".exe")), button["data"].value("step", ""), button["data"].value("direction", ""));
         return 0;
     }
-    soundboard("sounds/"+(button["data"].value("file", "")),(button["data"].value("volume", "")));
+    soundboard("sounds/"+(button["data"].value("file", "")),(button["data"].value("volume", "")),getid());
     return 1;
 }
 #endif
