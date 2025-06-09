@@ -119,7 +119,7 @@ window.addEventListener("load", () => {
   if (settingsButton) {
     settingsButton.addEventListener("click", () => {
       // Hier öffnest du deine Einstellungsseite
-      window.location.href = "settings.html";
+      navigateWithFade("settings.html");
     });
   }
 });

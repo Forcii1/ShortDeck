@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stream Deck Start</title>
+  <link rel="stylesheet" href="css/general/splash-screen.css" />
+</head>
+<body>
+  <!-- Übergangs-Fade -->
+  <div id="page-fade" class="fade hidden"></div>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <img src="assets/AppLogo.png" id="splash-logo" alt="Stream Deck Logo" />
+  </div>
+
+  <script src="transition.js"></script>
+  <script>
+    const logo = document.getElementById("splash-logo");
+
+    setTimeout(() => {
+      navigateWithFade("index.html", "slow");
+    }, 1300); // entspricht Animationdauer
+  </script>
+</body>
+</html>

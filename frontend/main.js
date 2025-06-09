@@ -23,7 +23,7 @@ function createWindow() {
     }
   });
 
-  win.loadFile('index.html');
+  win.loadFile('splash.html');
 }
 
 app.whenReady().then(createWindow);
