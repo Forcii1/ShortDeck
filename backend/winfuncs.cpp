@@ -276,7 +276,7 @@ std::wstring StringToWString(const std::string& s) {
 
 //--- Soundboard
 bool soundboard(const std::string& path, const std::string& vol, const std::string& id) {
-    std::string cmd = "winfiles\\playsound.bat \"" + path + "\" \"" + vol + "\" \"" + id+"\"";
+    std::string cmd = "winfiles\\playsound.exe \"" + path + "\" \"" + vol + "\" \"" + id+"\"";
     std::cout<<"IDU: "<<cmd<<std::endl;
 
     // Umwandlung std::string -> std::wstring

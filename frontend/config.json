@@ -3,8 +3,12 @@
     [
       {
         "label": "Button_1",
-        "type": "shortcut",
-        "data": {}
+        "type": "soundboard",
+        "data": {
+          "file": "sound_eb2898e069d23bf0a12742410876e0642da2733db07c4d72376a40d73f9099cf.mp3",
+          "name": "OMG(meme)-Sound Effect.mp3",
+          "volume": "200"
+        }
       },
       {
         "label": "Button_2",
